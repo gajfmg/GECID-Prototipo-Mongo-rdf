@@ -5,6 +5,7 @@
  */
 package testemongo;
 
+import com.mongodb.DBObject;
 import com.mongodb.MongoClient;
 import com.mongodb.MongoException;
 import com.mongodb.client.FindIterable;
@@ -13,6 +14,7 @@ import com.mongodb.client.MongoCursor;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.util.JSON;
 import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -25,9 +27,12 @@ import java.util.logging.Logger;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+import org.apache.jena.graph.Graph;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.NodeIterator;
+import org.apache.jena.riot.RDFDataMgr;
+import org.apache.jena.riot.RDFFormat;
 import org.bson.Document;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -42,33 +47,13 @@ public class TesteMongo {
   
       public static  MongoClient conexao = new MongoClient("localhost", 27017);
        public static MongoDatabase banco = conexao.getDatabase("testedb");
-       public static MongoCollection<Document> colecao = banco.getCollection("mycollection");
+       public static MongoCollection<Document> colecao = banco.getCollection("RDF");
      
     
     public static void main(String[] args) throws JSONException, ParserConfigurationException, SAXException, IOException {
-    /*
-        
-       File pasta = new File("C:\\ProjetoCESJFTCC\\testeMongo\\ARQ-RDF");
-       File[] arquivos = pasta.listFiles();
-        */
-        
-        String url = "C:\\ProjetoCESJFTCC\\testeMongo\\ARQ-RDF/arquivo.rdf";
-        
-       Model rdf = ModelFactory.createDefaultModel().read(url, "rj");  
-       NodeIterator lo = rdf.listObjects();
-       
-          Model read = rdf.read(url, "rj");
-     
-          System.out.println(read.getReader());
-        System.out.println("_________________________________");
-       
-          
-      while (lo.hasNext()){
-      
-          System.out.println(lo.nextNode());
-      } 
-       
+    
         }
+    
     public static void menu(){
       Scanner scan = new Scanner(System.in);
         System.out.println("OQUE VOCE DESEJA FAZER ? ");
@@ -168,6 +153,37 @@ public class TesteMongo {
         
     }
     
+    public static void inserirRDF(){
+     
+        System.out.println("INSERINDO RDF >>>>>");
+        Scanner scan = new Scanner(System.in);
+        System.out.println("INFORME O URL DO ARQUIVO A SER INSERIDO ");
+        String url = scan.nextLine();
+        
+       Model rdf = ModelFactory.createDefaultModel().read(url, "rj");  
+       
+    
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            RDFDataMgr.write(baos, rdf, RDFFormat.JSONLD);
+            
+            String result = baos.toString();
+        //    System.out.println(result);
+        DBObject dob =(DBObject)com.mongodb.util.JSON.parse(result);
+        
+            try{
+        Document dc = Document.parse(result);
+        
+        colecao.insertOne(dc);
+            System.out.println("ARQUIVO INSERIDO COM EXITO");
+            listarRegistros();
+        conexao.close();
+        }catch(MongoException e){
+            System.out.println("ERRO NA OPERAÇÃO:"+ e);
+            ;
+        }
+        
+    }
+    
     public static void atualizarRegistro(){
         MongoCollection<Document> colecao = banco.getCollection("mycollection");
         System.out.println("REGISTROS ATUAIS >>>>");
@@ -234,3 +250,14 @@ while((line=br.readLine())!= null){
 
     }
 }
+  
+       /* LISTAR OBJETOS DO MODEL
+       
+       NodeIterator lo = rdf.listObjects();
+            
+      while (lo.hasNext()){
+      
+          System.out.println(lo.nextNode());
+      } 
+     */
+    
