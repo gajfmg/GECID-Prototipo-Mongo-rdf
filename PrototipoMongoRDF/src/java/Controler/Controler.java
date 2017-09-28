@@ -89,7 +89,7 @@ public class Controler extends HttpServlet {
                 request.getRequestDispatcher("WEB-INF/VisualizarSchema.jsp").forward(request, response);
                 
                 }
-                 case "excluirRegistro":{
+                 case "Sim":{
                 HttpSession sessao = request.getSession();
                 String nomeColecao = (String) sessao.getAttribute("nomeSchema");
                 String id = request.getParameter("id");
