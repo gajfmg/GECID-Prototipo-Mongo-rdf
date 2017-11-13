@@ -18,7 +18,7 @@ String msg = (String)request.getAttribute("msg");
     <meta name="description" content="">
     <meta name="author" content="">
 
-    <title>Ben 10</title>
+    <title>GECON</title>
 
     <!-- Bootstrap Core CSS -->
     <link href="layout/css/bootstrap.min.css" rel="stylesheet">
@@ -56,7 +56,9 @@ String msg = (String)request.getAttribute("msg");
                     <% 
                     if (msg != null){
                     out.print("<p class='msg'>"+msg+"</p>");
+                    
                     }
+                    
                     %>
                     
                     <br/>

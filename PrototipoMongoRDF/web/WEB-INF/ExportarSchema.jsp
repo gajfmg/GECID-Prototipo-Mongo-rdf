@@ -13,6 +13,7 @@
     
                 HttpSession sessao = request.getSession();
                 Object Scolecao = sessao.getAttribute("colecoes");
+                String msg = (String)sessao.getAttribute("msg");
                 
                 List<String> colecoes = new ArrayList<String>();
                 colecoes = (List<String>) Scolecao;
@@ -53,14 +54,14 @@
             <div class="container-fluid">
                 <div class="row">
                     <div class="col-lg-12">
-                        <h1 class="page-header">Visualizar Schema RDF</h1>
+                        <h1 class="page-header">Exportar Schema RDF</h1>
                     </div>
                     <!-- /.col-lg-12 -->
                 </div>
             <div class="row">
-        <form method="POST" action="Controler?op=visualizarSchema" class="selecionar">
+        <form method="POST" action="Controler" class="selecionar">
             <p> Selecione o Schema :
-                        <select name='colecao'>
+                        <select name='nomeColecao'>
                                                 
                         <option value = ''>Selecionar</option>
                         <% 
@@ -78,9 +79,25 @@
                         %>                       
                                                 
                         </select>
-                         <input type="submit" value="Visualizar" name="Visualizar" id="Visualizar" class="btn btn-outline btn-primary"/>
+                        
+                        </p>
+                        <p>Informe local de destino : <input type="text" name ="destino"></p>
+                        <p>
+                            <input type="radio" name="op" value="exportarJSON"> Exportar para JSON 
+                            <input type="radio" name="op" value="exportarRDF"> Exportar para RDF 
+                        </p>
+                        <p>
+                            <input type="submit" name="exportar" value="Exportar Schema" class="btn btn-outline btn-primary"> 
+                             <a href="home.jsp"> <input type="button" value ="Cancelar" class="btn btn-outline btn-primary"></a>
+               
        
                         </p>
+                        <% 
+                    if (msg != null){
+                    out.print("<p class='msg'>"+msg+"</p>");
+                    }
+                    sessao.setAttribute("msg", null);
+                    %>
                </form>
              </div>       
         </div>

@@ -3,14 +3,18 @@
     Created on : 22/08/2017, 17:53:46
     Author     : Robson
 --%>
+<%@page import="java.util.ArrayList"%>
+<%@page import="org.bson.Document"%>
+<%@page import="com.mongodb.BasicDBList"%>
+<%@page import="com.mongodb.BasicDBObject"%>
 <%@page import="java.util.List"%>
 <%@page import="com.mongodb.DBObject"%>
 <%@page import="DAO.MongoDAO"%>
 <% 
         HttpSession sessao = request.getSession();
         MongoDAO dao = new MongoDAO();
-        List<DBObject> schema = (List<DBObject>) sessao.getAttribute("schema");
         
+        List<Document> schema = (List<Document>) sessao.getAttribute("schema"); 
 
 %>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
@@ -24,7 +28,7 @@
     <meta name="description" content="">
     <meta name="author" content="">
 
-    <title>Ben 10</title>
+    <title>GECON</title>
     <link href="layout/css/estilo.css" rel="stylesheet">
 
     <!-- Bootstrap Core CSS -->
@@ -40,8 +44,9 @@
 
 </head>
 <body>
+    <span id="topo"></span>
     <div id="wrapper">
-
+        <p class="botaotopo" id="botaoTopo"><a href="#topo">Voltar ao topo</a></p>
         <!-- Navigation -->
         <%@include file="../menu.html" %>
          <!-- Page Content -->
@@ -60,29 +65,42 @@
                 <form method="post" action="Controler">
                     <% 
                     for (int i = 0 ; i < schema.size() ; i++){
-                    DBObject atual = schema.get(i);
+                    Document atual = schema.get(i);
+                    Document spc = null;
                     int css = 0;
                     css = i % 2;
                 %>    
                         <div class='<% out.print("linha"+css); %>'>
+                            
                         <input type ='hidden' name='id' value =' <% out.print(atual.get("_id")); %>'/>
                         <input type ='hidden' name='labelClasse' value ='<% out.print(atual.get("label")); %>'/>
-                        <p> <label>Label Classe: <% out.print(atual.get("label")); %> </label> </p>
+                        <p> <label id = '<% out.print(atual.get("label")); %>'>Label Classe: <% out.print(atual.get("label")); %> </label> </p>
                         <input type ='hidden' name='comentario' value ='<% out.print(atual.get("comentario")); %>'/>
                            <p> <label>Comentário: <% out.print(atual.get("comentario")); %> </label> </p>
                         <input type ='hidden' name='uri' value ='<% out.print(atual.get("uri")); %>'/>
-                               <label>Comentário: <% out.print(atual.get("uri")); %> </label> </p>
+                               <label>URI: <% out.print(atual.get("uri")); %> </label> </p>
+                        <label>subclasses:</label>
+                           
+                        <ul> 
                         <% 
-                        DBObject sc = (DBObject) atual.get("subclasse");
-                        out.print("<input type ='hidden' name='subclasse' value ='"+sc.get("subclasses")+"'//>");
-                        out.print("<p><label> Subclasse: "+sc.get("subclasses")+"</label></p>");
+                        List<String> sc = (List<String>)atual.get("subclasses");
+                       
+                        for (int in =0 ; in < sc.size();in++){
+                        
+                        out.print("<li><a href='#"+sc.get(in).toString()+"'>"+sc.get(in).toString()+"</a></li>");
+                        }
                         %>
+                        </ul>
+                        
+                        
+                        <input type ='hidden' name='superclasse' value ='<% out.print(atual.get("superclasse")); %>'/>
+                        <p><label> Superclasse:<a href='#<% out.print(atual.get("superclasse")); %>'> <% out.print(atual.get("superclasse")); %></label></a></p>
+                       
+                        <input type ='hidden' name='SuperClasse' value ='<% out.print(atual.get("namespace")); %>'/>
+                           <p><label>Name Space: <% out.print(atual.get("namespace")); %> </label> </p>
 
-                        <input type ='hidden' name='SuperClasse' value ='<% out.print(atual.get("classe_definicao")); %>'/>
-                           <p><label>Comentário: <% out.print(atual.get("classe_definicao")); %> </label> </p>
-
-                        <p><input type ="button" class="btn btn-outline btn-primary" name="editar" value ="Editar" onclick="document.getElementById('<% out.print(atual.get("_id")); %>').style.display='block';"> 
-                            <input type ="button" class="btn btn-outline btn-primary" name="excluir" value ="Excluir Registro" onclick="document.getElementById('excluir_<% out.print(atual.get("_id")); %>').style.display='block';"> </p>
+                        <p><input type ="button" class="btn btn-outline btn-primary" name="editar" value ="Editar registro" onclick="document.getElementById('<% out.print(atual.get("_id")); %>').style.display='block';"> 
+                           <!-- <input type ="button" class="btn btn-outline btn-primary" name="excluir" value ="Excluir Registro" onclick="document.getElementById('excluir_<% out.print(atual.get("_id")); %>').style.display='block';"> </p> -->
                         </form>
 
                         </div>
@@ -93,9 +111,7 @@
                                                <label>Nome da classe :</label> <input type ='text' name='labelClasse' value ="<% if (atual.get("label") != null){out.print(atual.get("label"));} %>" size="40"/> </p>
                                                <label>Cometário :</label> <input type ='text' name='comentario' value ="<% if (atual.get("comentario") != null){out.print(atual.get("comentario"));} %>" size="40"/> </p>
                                                <label>URI :</label> <input type ='text' name='uri' value ="<% if (atual.get("uri") != null){out.print(atual.get("uri"));} %>" size="40"/> </p>
-                                               <label>Subclasse :</label> <input type ='text' name='subClasse' value ="<% if (sc.get("subclasses") != null){out.print(sc.get("subclasses"));} %>" size="40"/> </p>
-                                               <label>Super classe :</label> <input type ='text' name='superClasse' value ="<% if (atual.get("classe_definicao") != null){out.print(atual.get("classe_definicao"));} %>" size="40"/> </p>
-
+                                             
                                        <p> 
                                            <input type ='submit' name='op' value ='Sim' class="btn btn-outline btn-primary"/>
                                            <input type ="button" name="cancelar" value ="Cancelar" onclick="document.getElementById('excluir_<% out.print(atual.get("_id")); %>').style.display='none';" class="btn btn-outline btn-primary">
@@ -110,12 +126,11 @@
                                        <h1 class="page-header">Editar Registro do Schema :<% out.print(sessao.getAttribute("nomeSchema")); %></h1>
                                        <form method="post" action ="Controler" id='formEditar'>
                                        <input type='hidden' name='id' value ='<% out.print(atual.get("_id")); %>'/>
-                                               <label>Nome da classe :</label> <input type ='text' name='labelClasse' value ="<% if (atual.get("label") != null){out.print(atual.get("label"));} %>" size="40"/> </p>
+                                       <input type='hidden' name='labelAtual' value ='<% out.print(atual.get("label")); %>'/>
+                                               <label>Nome da classe :</label> <input type ='text' name='labelNovo' value ="<% if (atual.get("label") != null){out.print(atual.get("label"));} %>" size="40"/> </p>
                                                <label>Cometário :</label> <input type ='text' name='comentario' value ="<% if (atual.get("comentario") != null){out.print(atual.get("comentario"));} %>" size="40"/> </p>
                                                <label>URI :</label> <input type ='text' name='uri' value ="<% if (atual.get("uri") != null){out.print(atual.get("uri"));} %>" size="40"/> </p>
-                                               <label>Subclasse :</label> <input type ='text' name='subClasse' value ="<% if (sc.get("subclasses") != null){out.print(sc.get("subclasses"));} %>" size="40"/> </p>
-                                               <label>Super classe :</label> <input type ='text' name='superClasse' value ="<% if (atual.get("classe_definicao") != null){out.print(atual.get("classe_definicao"));} %>" size="40"/> </p>
-
+                                             
                                        <p> 
                                            <input type ='submit' name='op' value ='Salvar' class="btn btn-outline btn-primary"/>
                                            <input type ='reset' name='limpar' value ="Limpar" class="btn btn-outline btn-primary"/>
@@ -136,6 +151,19 @@
         </div>
         </div>
         </div>
+                
+                <script type="text/javascript">
+ $(document).ready(function(){
+    $(window).scroll(function(){
+        if ($(this).scrollTop() > 100) {
+            document.getElementById("botaoTopo").style.display:"block";
+        } else {
+        document.getElementById("botaoTopo").style.display:"none";
+        }
+    });
+
+});
+                </script>
          <!-- jQuery -->
     <script src="layout/js/jquery.min.js"></script>
 
@@ -148,6 +176,6 @@
     <!-- Custom Theme JavaScript -->
     <script src="layout/js/sb-admin-2.js"></script>
 
-  
+ <a href="#top" class="glyphicon glyphicon-chevron-up"></a> 
     </body>
 </html>

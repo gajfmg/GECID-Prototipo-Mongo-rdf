@@ -44,6 +44,15 @@ public class Redirecionador extends HttpServlet {
                 
                 request.getRequestDispatcher("WEB-INF/VisualizarSchema.jsp").forward(request, response);
                 break;}
+             case "excluirSchema":{
+                List<String> colecoes = new ArrayList<String>();
+                colecoes = dao.ListarColecoes();
+                String colecao = (String) request.getParameter("colecao");
+                HttpSession sessao = request.getSession();
+                sessao.setAttribute("colecoes", colecoes);
+                request.setAttribute("colecao", colecao);
+                request.getRequestDispatcher("WEB-INF/ExcluirSchema.jsp").forward(request, response);
+                break;}  
             case "selecionarSchema":{
                List<String> colecoes = new ArrayList<String>();
                 colecoes = dao.ListarColecoes();
@@ -51,8 +60,17 @@ public class Redirecionador extends HttpServlet {
                 HttpSession sessao = request.getSession();
                 sessao.setAttribute("colecoes", colecoes);
                 request.getRequestDispatcher("WEB-INF/SelecionarSchema.jsp").forward(request, response);
-                break;}    
+                break;}
+            case "exportarSchema":{
+               List<String> colecoes = new ArrayList<String>();
+                colecoes = dao.ListarColecoes();
+                
+                HttpSession sessao = request.getSession();
+                sessao.setAttribute("colecoes", colecoes);
+                request.getRequestDispatcher("WEB-INF/ExportarSchema.jsp").forward(request, response);
+                break;} 
         }
+           
         
     }
 

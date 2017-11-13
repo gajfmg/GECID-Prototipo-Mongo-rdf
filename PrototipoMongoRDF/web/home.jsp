@@ -9,7 +9,7 @@
     <meta name="description" content="">
     <meta name="author" content="">
 
-    <title>Ben 10</title>
+    <title>GECON</title>
 
     <!-- Bootstrap Core CSS -->
     <link href="layout/css/bootstrap.min.css" rel="stylesheet">
@@ -36,7 +36,7 @@
             <div class="container-fluid">
                 <div class="row">
                     <div class="col-lg-12">
-                        <h1 class="page-header">Manipular RDF</h1>
+                        <h1 class="page-header">Armazenamento de Schemas RDF</h1>
                     </div>
                     <!-- /.col-lg-12 -->
                 </div>
@@ -50,13 +50,14 @@
 						<div class="col-lg-4">
                                                     <a href="Redirec?link=selecionarSchema">
                                                     <p style="text-align:center;"> <img src="img/visualizar.jpg" width="250px" height="250px" ></p>
-                                                    <button type="button" class="btn btn-outline btn-primary btn-lg btn-block">Visualizar Schema RDF</button>
+                                                    <button type="button" class="btn btn-outline btn-primary btn-lg btn-block">Visualizar Schema </button>
                                                     </a>
 						</div>
 						<div class="col-lg-4">
-                                                    <p style="text-align:center;"> <img src="img/novo.jpg" width="250px" height="250px"></p>
-						<button type="button" class="btn btn-outline btn-primary btn-lg btn-block">Gerar arquivo RDF</button>
-						
+                                                    <a href="Redirec?link=exportarSchema">
+                                                    <p style="text-align:center;"> <img src="img/exportar2.jpg" width="250px" height="250px"></p>
+                                                    <button type="button" class="btn btn-outline btn-primary btn-lg btn-block">Exportar Schema </button>
+                                                    </a>
 						</div>
 						<!-- /.col-lg-12 -->
 				</div>

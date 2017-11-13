@@ -11,6 +11,8 @@ import com.mongodb.BasicDBObject;
 import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
 import com.mongodb.MongoException;
+import com.mongodb.client.FindIterable;
+import com.mongodb.client.MongoCursor;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -22,11 +24,16 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import org.apache.jena.graph.Triple;
 import org.apache.jena.ontology.OntClass;
 import org.apache.jena.ontology.OntModel;
 import org.apache.jena.ontology.OntModelSpec;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
+import org.apache.jena.rdf.model.Property;
+import org.apache.jena.rdf.model.RDFNode;
+import org.apache.jena.rdf.model.Resource;
+import org.apache.jena.rdf.model.Statement;
 import org.apache.jena.util.iterator.ExtendedIterator;
 import org.bson.Document;
 
@@ -81,7 +88,7 @@ public class Controler extends HttpServlet {
                 }
                 case "visualizarSchema":{
                 String nomeColecao = request.getParameter("colecao");
-                List<DBObject> schema = gerarSchema(nomeColecao);
+                List<Document> schema = criarSchema(nomeColecao);
                 HttpSession sessao = request.getSession();
                 sessao.setAttribute("schema", schema);
                 sessao.setAttribute("nomeSchema", nomeColecao);
@@ -96,31 +103,46 @@ public class Controler extends HttpServlet {
                 //deletar registro
                 dao.DeletarRegistro(nomeColecao, id);
                 //relistar registros de schema
-                List<DBObject> schema = gerarSchema(nomeColecao);
+                List<Document> schema = criarSchema(nomeColecao);
                 
                 sessao.setAttribute("schema", schema);
                 sessao.setAttribute("nomeSchema", nomeColecao);
                 
                 request.getRequestDispatcher("WEB-INF/VisualizarSchema.jsp").forward(request, response);
+                
+                }
+                 case "excluirSchema":{
+                HttpSession sessao = request.getSession();
+                String nomeColecao = request.getParameter("colecao");
+                
+                //deletar coleção
+                dao.DeletarColecao(nomeColecao);
+                //atualizar lista de schemas
+                List<String> colecoes = new ArrayList<>();
+                colecoes = dao.ListarColecoes();
+                sessao.setAttribute("colecoes", colecoes);
+                request.getRequestDispatcher("WEB-INF/ExcluirSchema.jsp").forward(request, response);
                 
                 }
                 case "Salvar":{
                 HttpSession sessao = request.getSession();
                 String nomeColecao = (String) sessao.getAttribute("nomeSchema");
                 String id = request.getParameter("id");
+                String labelatual = request.getParameter("labelAtual");
                 //pegando dados do formulario de edição
                 
                 BasicDBObject registro = new BasicDBObject();
-                registro.put("label",(String) request.getParameter("labelClasse"));
+                registro.put("label",(String) request.getParameter("labelNovo"));
                 registro.put("comentario", (String) request.getParameter("comentario"));
                 registro.put("uri",(String) request.getParameter("uri"));
+                /*
                 registro.put("subclasse", new BasicDBObject("subclasses",(String) request.getParameter("subClasse")) );
-                registro.put("classe_definicao",(String) request.getParameter("superClasse"));
-                
+                registro.put("superclasse",(String) request.getParameter("superClasse"));
+                */
                 //editar registro
-                dao.EditarRegistro(nomeColecao, id, registro);
+                dao.EditarRegistro(nomeColecao, id,labelatual, registro);
                 //relistar registros de schema
-                List<DBObject> schema = gerarSchema(nomeColecao);
+                List<Document> schema = criarSchema(nomeColecao);
                 
                 sessao.setAttribute("schema", schema);
                 sessao.setAttribute("nomeSchema", nomeColecao);
@@ -128,37 +150,62 @@ public class Controler extends HttpServlet {
                 request.getRequestDispatcher("WEB-INF/VisualizarSchema.jsp").forward(request, response);
                 
                 }
-                case "formEditar":{
+                case "exportarJSON":{
                 HttpSession sessao = request.getSession();
-                String nomeColecao = (String) sessao.getAttribute("nomeSchema");
-                String id = request.getParameter("id");
-                //pegandoo dados do registro a ser editado
-                BasicDBObject registro = new BasicDBObject();
-                registro.put("label", request.getParameter("labelClasse"));
-                registro.put("comentario", request.getParameter("comentario"));
-                registro.put("uri", request.getParameter("uri"));
-                registro.put("subclasse", new BasicDBObject("subclasses", request.getParameter("subclasse") ));
-                registro.put("classes_definicao", request.getParameter("superClasse"));
-                // enviando dados para serem exibidos no formulario
-                request.setAttribute("id", id);
-                request.setAttribute("labelClasse", registro.get("label"));
-                request.setAttribute("comentario", registro.get("comentario"));
-                request.setAttribute("uri", registro.get("uri"));
-                request.setAttribute("subClasse", registro.get("subClasse"));
-                request.setAttribute("superClasse", registro.get("classe_definicao"));
+                String nomeColecao = request.getParameter("nomeColecao");
+                String destino = request.getParameter("destino");
                 
-                request.getRequestDispatcher("WEB-INF/EditarSchema.jsp").forward(request, response);
+                String msg="";
+                boolean exportar =dao.exportarParaJSON(destino, nomeColecao);
+                
+                if (exportar){
+                msg = "Schema exportado com exito para : "+destino+"/"+nomeColecao;
+                }
+                sessao.setAttribute("msg", msg);
+                
+                request.getRequestDispatcher("WEB-INF/ExportarSchema.jsp").forward(request, response);
+                
+                
+                }
+                case"exportarRDF":{
+                HttpSession sessao = request.getSession();
+                String nomeColecao = request.getParameter("nomeColecao");
+                String destino = request.getParameter("destino");
+                
+                String msg="vazio";
+               
+                boolean exportar =dao.exportarParaRDF(destino, nomeColecao);
+                
+                if (exportar){
+                msg = "Schema exportado com exito para : "+destino+"/"+nomeColecao;
+                }else{
+                msg = "erro";
+                }
+                sessao.setAttribute("msg", msg);
+                request.getRequestDispatcher("WEB-INF/ExportarSchema.jsp").forward(request, response);
                 
                 }
                }
                 
     }
 
-
-        public List<DBObject> gerarSchema(String nomeColecao){
-        
-        DBCursor cursor = dao.BuscaSchema(nomeColecao);
-                 List<DBObject> Schema = new ArrayList<>();
+        public List<Document> criarSchema(String nomeColecao){
+            MongoCursor<Document> cursor = dao.buscarSchema(nomeColecao).iterator();
+            List<Document> Schema = new ArrayList<>();
+            while(cursor.hasNext()){
+                
+                Document colecao = cursor.next();
+                
+                Schema.add(colecao);
+                }
+                return Schema;
+            
+        }
+        /*public List<DBObject> gerarSchema(String nomeColecao){
+            DBCursor cursor = dao.BuscaSchema(nomeColecao);
+                 
+            List<DBObject> Schema = new ArrayList<>();
+                 
                 while(cursor.hasNext()){
                 DBObject colecao = cursor.next();
                 
@@ -166,6 +213,8 @@ public class Controler extends HttpServlet {
                 }
                 return Schema;
         }
+        */
+       
     // <editor-fold defaultstate="collapsed" desc="HttpServlet methods. Click on the + sign on the left to edit the code.">
     /**
      * Handles the HTTP <code>GET</code> method.
