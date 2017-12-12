@@ -156,6 +156,7 @@ public class MongoDAO {
         String partes[] = nomeColecao.split("/");
         int ultimaParte = partes.length-1;
         nomeColecao = partes[ultimaParte].toUpperCase();
+        nomeColecao = nomeColecao.substring(0, (nomeColecao.length()-4));
         //criando colecao
         List <String> colecoes = ListarColecoes();
         boolean verificador = verificarColecao(nomeColecao);
